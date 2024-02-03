@@ -11,8 +11,8 @@ const router = Router()
 // start: signup route
 const signupValidator = asyncHandler(async (req, res, next) => {
   const SignUpSchema = zod.object({
-    firstName: zod.string().min(5).max(255).trim(),
-    lastName: zod.string().min(5).max(255).trim(),
+    firstName: zod.string().min(2).max(255).trim(),
+    lastName: zod.string().min(1).max(255).trim(),
     email: zod.string().email().trim().toLowerCase(),
     password: zod.string().min(6).max(20),
   })
@@ -45,7 +45,7 @@ const signupController = asyncHandler(async (req, res) => {
   await Account.create({
     userId: user._id,
     // adding random balance to user's account and multiplying 100 for 2 decimal precision
-    balance: (1 + Math.random() * 10000) * 100,
+    balance: (Math.floor(1 + Math.random() * 10000)) * 100,
   })
 
   const token = jwt.sign({ userId: user._id }, JWT_SECRET)
