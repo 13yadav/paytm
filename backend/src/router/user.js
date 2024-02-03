@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import asyncHandler from 'express-async-handler'
 import zod from 'zod'
-import { User } from '../db/index.js'
+import { Account, User } from '../db/index.js'
 import jwt from 'jsonwebtoken'
 import { JWT_SECRET } from '../config/index.js'
 import authenticate from '../middlewares/auth.js'
@@ -41,6 +41,12 @@ const signupController = asyncHandler(async (req, res) => {
   user.password = hashedPassword
 
   await user.save()
+
+  await Account.create({
+    userId: user._id,
+    // adding random balance to user's account and multiplying 100 for 2 decimal precision
+    balance: (1 + Math.random() * 10000) * 100,
+  })
 
   const token = jwt.sign({ userId: user._id }, JWT_SECRET)
 
