@@ -12,7 +12,7 @@ router.use(authenticate)
 
 const balanceController = asyncHandler(async (req, res) => {
   const account = await Account.findOne({ userId: req.userId })
-  res.json({ balance: account.balance })
+  res.json({ balance: account.balance / 100 })
 })
 
 router.get('/balance', balanceController)
@@ -40,10 +40,11 @@ const transferController = asyncHandler(async (req, res) => {
   session.startTransaction()
 
   const { to, amount } = req.body
+  const amountWithPrecision = amount * 100
 
   const account = await Account.findOne({ userId: req.userId }).session(session)
 
-  if (!account || amount > account.balance) {
+  if (!account || amountWithPrecision > account.balance) {
     await session.abortTransaction()
     return res.status(400).json({ message: 'Insufficient balance' })
   }
@@ -60,7 +61,7 @@ const transferController = asyncHandler(async (req, res) => {
       userId: req.userId,
     },
     {
-      $inc: { balance: -amount },
+      $inc: { balance: -amountWithPrecision },
     }
   ).session(session)
 
@@ -69,7 +70,7 @@ const transferController = asyncHandler(async (req, res) => {
       userId: to,
     },
     {
-      $inc: { balance: amount },
+      $inc: { balance: amountWithPrecision },
     }
   ).session(session)
 
