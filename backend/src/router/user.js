@@ -131,4 +131,28 @@ const userProfileController = asyncHandler(async (req, res) => {
 router.put('/', authenticate, userProfileValidator, userProfileController)
 // end: user profile route
 
+// Route to get users, filterable via firstName/lastName
+const getUsersController = asyncHandler(async (req, res) => {
+  const filter = req.query.filter || ''
+
+  const users = await User.find({
+    $or: [
+      { firstName: { $regex: filter, $options: 'i' } },
+      { lastName: { $regex: filter, $options: 'i' } },
+    ],
+    _id: { $ne: req.userId },
+  })
+
+  res.json({
+    users: users.map((user) => ({
+      _id: user._id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    })),
+  })
+})
+
+router.get('/bulk', authenticate, getUsersController)
+
 export default router
