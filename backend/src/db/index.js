@@ -1,8 +1,10 @@
 import mongoose from 'mongoose'
 import { MONGO_URL } from '../config/index.js'
-import bcryptjs from "bcryptjs"
+import bcryptjs from 'bcryptjs'
 
-connectToDB().catch((err) => console.error('Could not connect to MongoDB...', err))
+connectToDB().catch((err) =>
+  console.error('Could not connect to MongoDB...', err)
+)
 
 async function connectToDB() {
   await mongoose.connect(MONGO_URL)
@@ -57,6 +59,20 @@ userSchema.methods.validatePassword = async function (candidatePassword) {
 
 const User = mongoose.model('User', userSchema)
 
-export default connectToDB;
+const accountSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  balance: {
+    type: Number,
+    required: true,
+  },
+})
 
-export { User }
+const Account = mongoose.model('Account', accountSchema)
+
+export default connectToDB
+
+export { User, Account }
